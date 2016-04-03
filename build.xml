@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+
+<project name="bank" default="compile" basedir=".">
+
+	<property name="src.dir" value="${basedir}/src"/>
+	<property name="res.dir" value="${basedir}/res"/>
+	<property name="lib.dir" value="${basedir}/lib"/>
+	<property name="classes.dir" value="${basedir}/bin"/>
+
+<!--
+	<property environment="env"/>
+	<property name="tomcat.home" value="${env.CATALINA_HOME}"/>
+-->
+	<property name="tomcat.home" value="C:\Program Files (x86)\apache-tomcat-8.0.32"/>
+		
+	<!-- Build classpath -->
+	<path id="classpath">
+		<pathelement location="${classes.dir}"/>
+		<fileset dir="${lib.dir}">
+			<include name="**/*.jar"/>
+		</fileset>
+	</path>
+
+	<target name="prepare" >
+		<mkdir dir="${classes.dir}"/>
+	</target>
+
+	<target name="clean">
+		<delete dir="${classes.dir}"/>
+	</target>
+
+	<target name="compile" depends="prepare">
+		<javac srcdir="${src.dir}"
+					 destdir="${classes.dir}"
+					 debug="on"
+					 includeantruntime="false"
+					 deprecation="on"
+					 optimize="off">
+			<classpath refid="classpath"/>
+			<include name="**/*.java" />
+		</javac>
+	</target>
+
+	<target name="httpbank.war" depends="compile">
+		<war warfile="${basedir}/httpbank.war" webxml="${res.dir}/web.xml">
+			<classes dir="${classes.dir}" >
+				<include name="bank/*.class" />
+				<include name="bank/local/*.class" />
+				<include name="bank/http/*.class" />
+				<include name="bank/util/*.class" />
+			</classes>
+			<lib dir="${lib.dir}"/>
+		</war>
+	</target>
+
+	<target name="httpbank.deploy" depends="httpbank.war">
+		<copy file="${basedir}/httpbank.war" todir="${tomcat.home}/webapps"/>
+	</target>
+
+	<target name="httpbank.undeploy">
+		<delete file="${tomcat.home}/webapps/httpbank.war"/>
+	</target>
+
+</project>
+
